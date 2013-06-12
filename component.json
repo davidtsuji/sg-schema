@@ -1,0 +1,19 @@
+{
+	"name": "sgSchema",
+	"description": "Apply JavaScript objects to a schema",
+	"repo": "davidtsuji/sgSchema",
+	"version": "0.0.1",
+	"main": "index.js",
+	"scripts": [
+
+		"index.js"
+
+	],
+	"dependencies": {
+
+		"component/jquery": "*",
+		"davidtsuji/underscore": "*",
+		"davidtsuji/sgCast": "*"
+
+	}
+}

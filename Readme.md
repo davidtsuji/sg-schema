@@ -1,0 +1,1 @@
+Apply JavaScript objects to a schema
