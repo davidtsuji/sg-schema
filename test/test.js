@@ -89,6 +89,7 @@ test('schema test 1', function(){
 	ok( anObjectWithaSchemaApplied.address.postcode === 4000, 'address.postcode equals 4000' );
 	ok( anObjectWithaSchemaApplied.address.work.constructor === Object, 'address.work constructor equals an Object' );
 	ok( anObjectWithaSchemaApplied.address.work.hasOwnProperty('badKey') === false, 'address.work does not contain a key "badKey"' );
+	ok( anObjectWithaSchemaApplied.address.work.country === '', 'country is an empty string' );
 	ok( JSON.stringify(anObjectWithaSchemaApplied.address) === '{"street":"1 smith street","postcode":4000,"work":{"country":""}}', 'address stringified' );
 	ok( anObjectWithaSchemaApplied.favouriteColor1 === 'red', 'bad value so use the first value' );
 	ok( anObjectWithaSchemaApplied.favouriteColor2 === 'red', 'bad value but use the values instead of the default' );
@@ -145,6 +146,27 @@ test('schema test 2', function(){
 
 });
 
+test('schema test 3', function(){
+
+	var schema = {
+
+		name : String,
+		qualifications : {
+
+			certificate : String,
+
+		},
+		isAlive : { _type : Boolean },
+
+	}
+
+	var anObjectWithaSchemaApplied = sg.schema.apply(schema, { isAlive : true });
+
+	ok( anObjectWithaSchemaApplied.name === '', 'name should be an empty string')
+	ok( anObjectWithaSchemaApplied.qualifications.certificate === '', 'certificate should be an empty string')
+	ok( anObjectWithaSchemaApplied.isAlive === true, 'isAlive should be true')
+
+});
 
 test('schema test with auto defaults off', function() {
 

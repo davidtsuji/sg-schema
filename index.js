@@ -9,8 +9,7 @@ window.sg.schema = {
 
 	getSchemaProperties : function(_properties) {
 
-		var $this = this
-		  , properties
+		var properties
 
 		properties               = typeof(_properties) == 'object' ? _properties : /function|string/i.test(typeof(_properties)) ? { _type : _properties } : {};
 		properties._type         = _.has(properties, '_type') ? properties._type : Object;
@@ -18,26 +17,25 @@ window.sg.schema = {
 		properties._default      = properties['_default'];
 		properties._values       = sg.cast(properties['_values'], Array, []);
 		properties._typeAsString = typeof(properties._type) == 'string' ? properties._type : sg.cast(properties._type, String, '').match(/^function ([^\(]*)\(\)/)[1];
-		properties._typeDefault  = $this.defaults[properties._typeAsString];
+		properties._typeDefault  = sg.schema.defaults[properties._typeAsString];
 
 		return properties;
 
 	},
 
-	parseResult : function(_result, _data, _disableAutoDefauts) {
+	parseResult : function(_result, _data, _disableAutoDefaults) {
 
-		var $this = this
-		  , properties
+		var properties
 		  , objectData
 		  , defaultData
 		  , dataIsEmpty
 
 		_.each(_result, function(_properties, _key) {
 
-			properties = $this.getSchemaProperties(_properties);
+			properties = sg.schema.getSchemaProperties(_properties);
 
 			objectData  = {};
-			defaultData = ! _.isUndefined(properties._default) || _disableAutoDefauts ? properties._default : properties._typeDefault;
+			defaultData = ! _.isUndefined(properties._default) || _disableAutoDefaults ? properties._default : properties._typeDefault;
 			dataIsEmpty = _data[_key];
 
 			_.each(_.keys(properties), function(_key){
@@ -50,7 +48,7 @@ window.sg.schema = {
 
 				_result[_key] = _.isEmpty(objectData)
 				              ? sg.cast(_data[_key], properties._type, defaultData, properties._values, properties)
-				              : $this.parseResult(objectData, sg.cast(_data[_key], Object, {}), defaultData, _disableAutoDefauts, properties);
+				              : sg.schema.parseResult(objectData, sg.cast(_data[_key], Object, {}), _disableAutoDefaults);
 
 			} else {
 
@@ -64,13 +62,12 @@ window.sg.schema = {
 
 	},
 
-	apply : function(_schema, _data, _disableAutoDefauts) {
+	apply : function(_schema, _data, _disableAutoDefaults) {
 
-		var $this  = this
-		  , schema = $.extend(true, {}, _schema || {})
+		var schema = $.extend(true, {}, _schema || {})
 		  , data   = $.extend(true, {}, _data || {})
 
-		return _.isEmpty(schema) ? _data : $this.parseResult(schema, data, _disableAutoDefauts);
+		return _.isEmpty(schema) ? _data : sg.schema.parseResult(schema, data, _disableAutoDefaults);
 
 	}
 
