@@ -36,6 +36,13 @@ test('schema test 1', function(){
 	 	likesPorkBelly2 : { _type : Boolean, _values : [ true ] },
 	 	likesPorkBelly3 : { _type : Boolean, _values : [ true ] },
 
+	 	freeTypeValue1 : '*',
+	 	freeTypeValue2 : { _type: '*'},
+	 	freeTypeValue3 : { _type: '*'},
+	 	freeTypeValue4 : { _type: '*', _default : 'aqua'},
+	 	freeTypeValue5 : { _type: '*', _values : [ 'pink', 'blue' ]},
+	 	freeTypeValue6 : '*',
+
 	}
 
 	var anObject = {
@@ -73,6 +80,11 @@ test('schema test 1', function(){
 		likesPorkBelly2 : 'false',
 		likesPorkBelly3 : null,
 
+		freeTypeValue1 : 'free value 1',
+		freeTypeValue2 : true,
+		freeTypeValue3 : { a: 'a', b:{ c: 'c'}},
+		freeTypeValue5 : '',
+
 	};
 
 	var anObjectWithaSchemaApplied = sg.schema.apply(aSchema, anObject);
@@ -102,6 +114,13 @@ test('schema test 1', function(){
 	ok( anObjectWithaSchemaApplied.likesPorkBelly1 === true, 'more default value tests');
 	ok( anObjectWithaSchemaApplied.likesPorkBelly2 === true, 'more default value tests');
 	ok( anObjectWithaSchemaApplied.likesPorkBelly3 === true, 'more default value tests');
+
+	ok( anObjectWithaSchemaApplied.freeTypeValue1 === 'free value 1', 'free type test 1');
+	ok( anObjectWithaSchemaApplied.freeTypeValue2 === true, 'free type test 2');
+	ok( JSON.stringify(anObjectWithaSchemaApplied.freeTypeValue3) === '{"a":"a","b":{"c":"c"}}', 'free type test 3');
+	ok( anObjectWithaSchemaApplied.freeTypeValue4 === 'aqua', 'free type test 4');
+	ok( anObjectWithaSchemaApplied.freeTypeValue5 === 'pink', 'free type test 5');
+	ok( anObjectWithaSchemaApplied.freeTypeValue6 === '', 'free type test 6');
 
 });
 

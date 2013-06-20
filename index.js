@@ -65,7 +65,7 @@ window.sg.schema = {
 	apply : function(_schema, _data, _disableAutoDefaults) {
 
 		var schema = $.extend(true, {}, _schema || {})
-		  , data   = $.extend(true, {}, _data || {})
+		  , data   = $.extend(true, {}, _data   || {})
 
 		return _.isEmpty(schema) ? _data : sg.schema.parseResult(schema, data, _disableAutoDefaults);
 
@@ -82,5 +82,6 @@ window.sg.schema.defaults = {
 	'Number'  : 0,
 	'Object'  : {},
 	'String'  : '',
+	'*'       : '',
 
 }
