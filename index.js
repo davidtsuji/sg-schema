@@ -47,29 +47,11 @@ function parseResult(_schema, _data, _disableAutoDefaults) {
 	  , objectData
 	  , defaultData
 
-
-	// console.log('----------------------------------------');
-	// console.log('# schema');
-	// console.log('\t\t', 'data', _schema);
-	// console.log('\t\t', 'keys', Object.keys(_schema));
-
 	each(Object.keys(_schema), function(_key) {
-
-		// console.log('--------------------');
-		// console.log('# ', _key);
-
-		// console.log('default properties');
-		// console.log('\t\t', _schema[_key]);
-		// console.log('\t\t', type(_schema[_key]));
-
 
 		properties  = getSchemaProperties(_schema[_key]);
 		objectData  = {};
 		defaultData = type(properties._default) != 'undefined' || _disableAutoDefaults ? properties._default : properties._typeDefault;
-
-		// console.log('properties');
-		// console.log('\t\t', properties);
-		// console.log('\t\t', '[keys]', Object.keys(properties));
 
 		// Find non system keys (probably an object)
 		each(Object.keys(properties), function(_propertyKey){
@@ -83,26 +65,14 @@ function parseResult(_schema, _data, _disableAutoDefaults) {
 
 		});
 
-		// console.log('objectData');
-		// console.log('\t\t', objectData);
-		// console.log('\t\t', '[isEmpty]', isEmpty(objectData));
-
 		// If it's mandatory or it's optional and there's data
 		if (properties._optional == false || (properties._optional == true && type(_data[_key]) != 'undefined')) {
 
-			// if (isEmpty(objectData)) console.log('\t\t', properties._type);
-
-			// console.log('objectData');
-			// console.log('\t\t' + JSON.stringify(objectData))
-
-			// If 
 			_schema[_key] = (isEmpty(objectData) && type(_data[_key]) != 'object') || properties._type == '*'
 			              ? cast(_data[_key], properties._type, defaultData, properties._values, properties)
 			              : parseResult(objectData, cast(_data[_key], Object, {}), _disableAutoDefaults)
 
 		}  else {
-
-			// console.log('** DELETE THE KEY ('+_key+') **');
 
 			delete _schema[_key];
 
