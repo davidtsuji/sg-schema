@@ -1,87 +1,126 @@
-var _ = require('underscore')
-  , $ = require('jquery')
+if ( ! window['moment']) require('moment');
 
-require('sgCast');
+var type = require('type')
+  , cast = require('sg-cast')
+  , each = require('each')
+  , clone = require('clone')
+  , isEmpty = require('sg-is-empty')
 
-window.sg = window['sg'] || {};
+function getDefault(_key) {
 
-window.sg.schema = {
+	var defaults = {
 
-	getSchemaProperties : function(_properties) {
+		'Array'   : [],
+		'Boolean' : false,
+		'Date'    : new Date(),
+		'Moment'  : moment(),
+		'Number'  : 0,
+		'Object'  : {},
+		'String'  : '',
+		'*'       : '',
 
-		var properties
+	}
 
-		properties               = typeof(_properties) == 'object' ? _properties : /function|string/i.test(typeof(_properties)) ? { _type : _properties } : {};
-		properties._type         = _.has(properties, '_type') ? properties._type : Object;
-		properties._optional     = sg.cast(properties['_optional'], Boolean, false);
-		properties._default      = properties['_default'];
-		properties._values       = sg.cast(properties['_values'], Array, []);
-		properties._typeAsString = typeof(properties._type) == 'string' ? properties._type : sg.cast(properties._type, String, '').match(/^function ([^\(]*)\(\)/)[1];
-		properties._typeDefault  = sg.schema.defaults[properties._typeAsString];
+	return defaults.hasOwnProperty(_key) ? defaults[_key] : ''
 
-		return properties;
+}
 
-	},
+function getSchemaProperties(_properties) {
 
-	parseResult : function(_result, _data, _disableAutoDefaults) {
+	var properties
 
-		var properties
-		  , objectData
-		  , defaultData
-		  , dataIsEmpty
+	properties               = type(_properties) == 'object' ? _properties : /function|string/i.test(type(_properties)) ? { _type : _properties } : {};
+	properties._type         = properties.hasOwnProperty('_type') ? properties._type : Object;
+	properties._optional     = cast(properties['_optional'], Boolean, false);
+	properties._default      = properties['_default'];
+	properties._values       = cast(properties['_values'], Array, []);
+	properties._typeAsString = type(properties._type) == 'string' ? properties._type : cast(properties._type, String, '').match(/^function ([^\(]*)\(\)/)[1];
+	properties._typeDefault  = getDefault(properties._typeAsString);
 
-		_.each(_result, function(_properties, _key) {
+	return properties;
 
-			properties = sg.schema.getSchemaProperties(_properties);
+}
 
-			objectData  = {};
-			defaultData = ! _.isUndefined(properties._default) || _disableAutoDefaults ? properties._default : properties._typeDefault;
-			dataIsEmpty = _data[_key];
+function parseResult(_schema, _data, _disableAutoDefaults) {
 
-			_.each(_.keys(properties), function(_key){
+	var properties
+	  , objectData
+	  , defaultData
 
-				if (/^[^_]/.test(_key)) objectData[_key] = properties[_key];
 
-			});
+	// console.log('----------------------------------------');
+	// console.log('# schema');
+	// console.log('\t\t', 'data', _schema);
+	// console.log('\t\t', 'keys', Object.keys(_schema));
 
-			if (properties._optional == false || (properties._optional == true && ! _.isUndefined(_data[_key]))) {
+	each(Object.keys(_schema), function(_key) {
 
-				_result[_key] = _.isEmpty(objectData)
-				              ? sg.cast(_data[_key], properties._type, defaultData, properties._values, properties)
-				              : sg.schema.parseResult(objectData, sg.cast(_data[_key], Object, {}), _disableAutoDefaults);
+		// console.log('--------------------');
+		// console.log('# ', _key);
 
-			} else {
+		// console.log('default properties');
+		// console.log('\t\t', _schema[_key]);
+		// console.log('\t\t', type(_schema[_key]));
 
-				delete _result[_key];
+
+		properties  = getSchemaProperties(_schema[_key]);
+		objectData  = {};
+		defaultData = type(properties._default) != 'undefined' || _disableAutoDefaults ? properties._default : properties._typeDefault;
+
+		// console.log('properties');
+		// console.log('\t\t', properties);
+		// console.log('\t\t', '[keys]', Object.keys(properties));
+
+		// Find non system keys (probably an object)
+		each(Object.keys(properties), function(_propertyKey){
+
+			if (/^[^_]/.test(_propertyKey)) {
+
+				// console.log('\t\t', '[added key]', _propertyKey);
+				objectData[_propertyKey] = properties[_propertyKey];
 
 			}
 
 		});
 
-		return _result;
+		// console.log('objectData');
+		// console.log('\t\t', objectData);
+		// console.log('\t\t', '[isEmpty]', isEmpty(objectData));
 
-	},
+		// If it's mandatory or it's optional and there's data
+		if (properties._optional == false || (properties._optional == true && type(_data[_key]) != 'undefined')) {
 
-	apply : function(_schema, _data, _disableAutoDefaults) {
+			// if (isEmpty(objectData)) console.log('\t\t', properties._type);
 
-		var schema = $.extend(true, {}, _schema || {})
-		  , data   = $.extend(true, {}, _data   || {})
+			// console.log('objectData');
+			// console.log('\t\t' + JSON.stringify(objectData))
 
-		return _.isEmpty(schema) ? _data : sg.schema.parseResult(schema, data, _disableAutoDefaults);
+			// If 
+			_schema[_key] = (isEmpty(objectData) && type(_data[_key]) != 'object') || properties._type == '*'
+			              ? cast(_data[_key], properties._type, defaultData, properties._values, properties)
+			              : parseResult(objectData, cast(_data[_key], Object, {}), _disableAutoDefaults)
 
-	}
+		}  else {
+
+			// console.log('** DELETE THE KEY ('+_key+') **');
+
+			delete _schema[_key];
+
+		}
+
+	});
+
+	return _schema;
 
 }
 
-window.sg.schema.defaults = {
+function apply(_schema, _data, _disableAutoDefaults) {
 
-	'Array'   : [],
-	'Boolean' : false,
-	'Date'    : new Date(),
-	'Moment'  : window['moment'] ? moment() : new Date(),
-	'Number'  : 0,
-	'Object'  : {},
-	'String'  : '',
-	'*'       : '',
+	var schema = type(_schema) == 'object' ? clone(_schema) : {}
+	  , data   = type(_data)   == 'object' ? clone(_data)   : {}
+
+	return isEmpty(schema) ? _data : parseResult(schema, data, _disableAutoDefaults);
 
 }
+
+exports.apply = apply;

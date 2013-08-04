@@ -1,4 +1,7 @@
-require('sgSchema');
+var schema = require('sg-schema');
+
+cast = require('sg-cast');
+isEmpty = require('sg-is-empty');
 
 test('schema test 1', function(){
 
@@ -87,7 +90,9 @@ test('schema test 1', function(){
 
 	};
 
-	var anObjectWithaSchemaApplied = sg.schema.apply(aSchema, anObject);
+	var anObjectWithaSchemaApplied = schema.apply(aSchema, anObject);
+
+	// console.log(anObjectWithaSchemaApplied);
 
 	ok( anObjectWithaSchemaApplied.name === 'David' );
 	ok( anObjectWithaSchemaApplied.age === 33, 'age should equal 33' );
@@ -159,7 +164,7 @@ test('schema test 2', function(){
 
 	}
 
-	var anObjectWithaSchemaApplied = sg.schema.apply(aSchema, anObject);
+	var anObjectWithaSchemaApplied = schema.apply(aSchema, anObject);
 
 	ok( JSON.stringify(anObjectWithaSchemaApplied) == '{"name":"Max","ismale":true,"age":0,"height":0,"address":{"street":"1 smith st","work":{"suburb":"","somearray":[1],"emptyobject":{"a":"a"}}}}' )
 
@@ -167,19 +172,22 @@ test('schema test 2', function(){
 
 test('schema test 3', function(){
 
-	var schema = {
+	var aSchema = {
 
 		name : String,
 		qualifications : {
 
 			certificate : String,
+			year: Number
 
 		},
 		isAlive : { _type : Boolean },
 
 	}
 
-	var anObjectWithaSchemaApplied = sg.schema.apply(schema, { isAlive : true });
+	var anObjectWithaSchemaApplied = schema.apply(aSchema, { isAlive : true });
+
+	// console.log(anObjectWithaSchemaApplied);
 
 	ok( anObjectWithaSchemaApplied.name === '', 'name should be an empty string')
 	ok( anObjectWithaSchemaApplied.qualifications.certificate === '', 'certificate should be an empty string')
@@ -221,7 +229,7 @@ test('schema test with auto defaults off', function() {
 
 	}
 
-	var anObjectWithaSchemaApplied = sg.schema.apply(aSchema, anObject, true);
+	var anObjectWithaSchemaApplied = schema.apply(aSchema, anObject, true);
 
 	ok( JSON.stringify(anObjectWithaSchemaApplied) == '{"name":"Max","address":{"street":"1 smith st","work":{"somearray":[1],"emptyobject":{"a":"a"}}}}' );
 
@@ -229,6 +237,6 @@ test('schema test with auto defaults off', function() {
 
 test('an empty schema returns the data', function() {
 
-	ok( JSON.stringify(sg.schema.apply({}, { a: 'a', b: { c: 'c' } })) == '{"a":"a","b":{"c":"c"}}' );
+	ok( JSON.stringify(schema.apply({}, { a: 'a', b: { c: 'c' } })) == '{"a":"a","b":{"c":"c"}}' );
 
 });
