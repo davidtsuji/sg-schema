@@ -58,7 +58,6 @@ function parseResult(_schema, _data, _disableAutoDefaults) {
 
 			if (/^[^_]/.test(_propertyKey)) {
 
-				// console.log('\t\t', '[added key]', _propertyKey);
 				objectData[_propertyKey] = properties[_propertyKey];
 
 			}
@@ -68,7 +67,7 @@ function parseResult(_schema, _data, _disableAutoDefaults) {
 		// If it's mandatory or it's optional and there's data
 		if (properties._optional == false || (properties._optional == true && type(_data[_key]) != 'undefined')) {
 
-			_schema[_key] = (isEmpty(objectData) && type(_data[_key]) != 'object') || properties._type == '*'
+			_schema[_key] = (isEmpty(objectData) && (type(_data[_key]) != 'object' || properties._type == Object)) || properties._type == '*'
 			              ? cast(_data[_key], properties._type, defaultData, properties._values, properties)
 			              : parseResult(objectData, cast(_data[_key], Object, {}), _disableAutoDefaults)
 

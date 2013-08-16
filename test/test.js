@@ -45,6 +45,8 @@ test('schema test 1', function(){
 	 	freeTypeValue4 : { _type: '*', _default : 'aqua'},
 	 	freeTypeValue5 : { _type: '*', _values : [ 'pink', 'blue' ]},
 	 	freeTypeValue6 : '*',
+	 	schema: Object,
+	 	schema1: {_type: Object}
 
 	}
 
@@ -87,6 +89,14 @@ test('schema test 1', function(){
 		freeTypeValue2 : true,
 		freeTypeValue3 : { a: 'a', b:{ c: 'c'}},
 		freeTypeValue5 : '',
+		schema: {
+			name: String
+		},
+		schema1: {
+			a: {
+				b: 'b'
+			}
+		}
 
 	};
 
@@ -126,6 +136,9 @@ test('schema test 1', function(){
 	ok( anObjectWithaSchemaApplied.freeTypeValue4 === 'aqua', 'free type test 4');
 	ok( anObjectWithaSchemaApplied.freeTypeValue5 === 'pink', 'free type test 5');
 	ok( anObjectWithaSchemaApplied.freeTypeValue6 === '', 'free type test 6');
+	ok( typeof anObjectWithaSchemaApplied.schema === 'object', 'object');
+	ok( anObjectWithaSchemaApplied.schema.name === String, 'object');
+	ok( anObjectWithaSchemaApplied.schema1.a.b === 'b');
 
 });
 
